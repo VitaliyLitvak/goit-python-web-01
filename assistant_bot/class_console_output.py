@@ -1,4 +1,5 @@
 from abc import ABC
+from rich.console import Text
 from enum import Enum, auto
 
 
@@ -14,7 +15,18 @@ class ConsoleOutputAbstract(ABC):
         ...
 
 
-class TerminalOutput(ConsoleOutputAbstract):
+class TerminalClearRichOutputConsole:
+
+    def get_clear_text(self, text: str) -> str:
+        r_text = Text.from_markup(text)
+        for segment in r_text:
+            if segment.style:
+                segment.style.bold = False
+        text = r_text.plain
+        return text
+
+
+class TerminalOutput(ConsoleOutputAbstract, TerminalClearRichOutputConsole):
     service = Terminals.TERMINAL
 
     def output(self, text: str, *args) -> None:
@@ -30,7 +42,7 @@ class Telegram:
         print(f"Send {text} to Telegram")
 
 
-class TelegramOutput(ConsoleOutputAbstract):
+class TelegramOutput(ConsoleOutputAbstract, TerminalClearRichOutputConsole):
     service = Terminals.TELEGRAM
 
     def __init__(self, token) -> None:
